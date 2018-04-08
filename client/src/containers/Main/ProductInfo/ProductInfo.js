@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
-import { withRouter, Link } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
 import RaisedButton from 'material-ui/RaisedButton';
 import axios from 'axios';
+import Snackbar from 'material-ui/Snackbar';
 import './ProductInfo.css';
+import { TextField } from 'material-ui/TextField';
 
 class productInfo extends Component {
   state = {
@@ -13,9 +15,11 @@ class productInfo extends Component {
     showErr: false,
     validOrder: false,
     storedItem: [],
-    itemsCounter: 0
+    itemsCounter: 0,
+    snackBarOpen: false
   };
   componentDidMount() {
+    window.scrollTo(0, 0)
     axios({
       method: 'post',
       url: `http://localhost:3001/${this.props.location.state.type}/${this.props.location.state.productID}`,
@@ -35,7 +39,11 @@ class productInfo extends Component {
       };
     });
   };
-
+  handleRequestClose = () => {
+    this.setState({
+      snackBarOpen: false,
+    });
+  };
   addProductHnadler = () => {
     let newPorduct = this.state.product;
     newPorduct[0].selectedSize = this.state.selectedSize;
@@ -55,18 +63,19 @@ class productInfo extends Component {
             validOrder: true,
             showErr: false,
             itemsCounter: prevState.itemsCounter += 1,
+            snackBarOpen: true,
           };
         }, () => {
           let newPorductObj = Object.assign({}, ...newPorduct)
-          // this.props.product(this.state.itemsCounter);
-
-          axios({
-            method: 'post',
-            url: 'http://localhost:3001/bag',
-            data: [newPorductObj, this.state.itemsCounter]
-          }).then(response => {
-            alert(response.data);
-          })
+          var itemsArr = localStorage.getItem("items");
+          let items;
+          if (itemsArr) {
+            items = JSON.parse(itemsArr);
+          } else {
+            items = [];
+          }
+          items.push(newPorductObj);
+          localStorage.setItem('items', JSON.stringify(items));
         });
     }
   };
@@ -76,15 +85,12 @@ class productInfo extends Component {
       errMessage = 'Please Select Size';
     }
 
-
-
     let productItems = this.state.product;
     const product = productItems.map((item, i) => {
 
       let discount = (
         <h3>
           <span style={ {
-            letterSpacing: '.5px',
             fontWeight: 700,
             letterSpacing: '2px',
             color: '#d01345'
@@ -102,8 +108,6 @@ class productInfo extends Component {
       </span>
         </h3>
       )
-
-
       return (
         <div className="container" key={ i }>
           <div className="product-container">
@@ -149,6 +153,13 @@ class productInfo extends Component {
                 onClick={ this.addProductHnadler }
               />
             </div>
+            <Snackbar
+              open={ this.state.snackBarOpen }
+              message="Product added to your Bag"
+              autoHideDuration={ 4000 }
+              onRequestClose={ this.handleRequestClose }
+              contentStyle={ { textAlign: 'center' } }
+            />
           </div>
         </div>
       );

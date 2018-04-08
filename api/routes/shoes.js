@@ -2,6 +2,7 @@ const express = require('express');
 var { mongoose } = require('./../db/mongoose')
 var { Shoes } = require('./../models/shoesModel')
 const { ObjectID } = require('mongodb')
+var _ = require('lodash');
 const router = express.Router();
 
 
@@ -25,9 +26,12 @@ router.post('/', function (req, res, next) {
 
 router.get('/', function (req, res, next) {
     let data = {}
+
     Shoes.find().count().then((count) => {
         data.count = count;
+
     })
+
     Shoes.find().then((shoes) => {
         data.shoes = shoes;
         res.send(data);
@@ -35,6 +39,24 @@ router.get('/', function (req, res, next) {
         res.status(400).send({ err })
     })
 });
+
+router.get('/:sortBy', function (req, res, next) {
+    let data = {}
+    Shoes.find().count().then((count) => {
+        data.count = count;
+    })
+    Shoes.find().then((shoes) => {
+        data.shoes = shoes;
+        let sortArr = _.filter(data.shoes, { 'brand': req.params.sortBy });
+        if (!sortArr) {
+            res.send(data.arr)
+        }
+        res.send(sortArr);
+    }, (err) => {
+        res.status(400).send({ err })
+    })
+});
+
 router.post('/:id', function (req, res, next) {
     let id = req.params.id
     if (!ObjectID.isValid(id)) {

@@ -1,47 +1,36 @@
 import React, { Component } from 'react';
 import Header from '../../components/Header/Header';
-import Login from '../Login/Login';
 import SubHeader from '../../components/Subheader/Subheader';
 import Clothing from './Clothing/Clothing';
 import Shoes from './Shoes/Shoes';
 import Sale from './Sale/Sale';
-import Accessories from './Accessories/Accessories';
+import shopAll from './shopAll/shopAll';
 import Welcome from './WelcomePage/WelcomePage';
 import ProductInfo from './ProductInfo/ProductInfo';
-import Cart from '.././Cart/Cart';
-import axios from 'axios';
 import './Main.css';
-import { Route, Link, Switch, Redirect, withRouter } from 'react-router-dom';
+import { Route, Switch, Redirect, withRouter } from 'react-router-dom';
+import Footer from '../../components/Footer/Footer'
 
 class main extends Component {
   state = {
     loggedIn: true,
-    itemsIntheBagIcon: 0
+    itemsInTheBagIcon: 0
   };
-  // componentDidMount() {
-  //   this.loggedInCheck(this.props.location.state.loggedIn);
-  // }
+
   loggedInCheck = val => {
     this.setState(prevState => {
       return { loggedIn: true };
     }, console.log(this.state, val));
   };
-  getBagItems(val) {
-    axios({
-      method: 'get',
-      url: 'http://localhost:3001/bag/updateBagIcon',
-    }).then(response => {
-      console.log(response.data)
-      this.setState({
-        itemsIntheBagIcon: response.data
-      })
+  getBagItems() {
+    this.setState(prevState => {
+      return { itemsInTheBagIcon: prevState.itemsInTheBagIcon += 1 }
     })
-
   }
 
   render() {
     let reLogin;
-    if (!this.state.loggedIn || this.state.loggedIn == undefined) {
+    if (!this.state.loggedIn || this.state.loggedIn === undefined) {
       reLogin = <Redirect to="/" />;
     }
 
@@ -80,11 +69,18 @@ class main extends Component {
             />
             <Route path={ `${this.props.match.url}/Sale` } component={ Sale } />
             <Route
-              path={ `${this.props.match.url}/Accessories` }
-              component={ Accessories }
+              exact
+              path={ this.props.match.url + '/shop All/:type' }
+              component={ ProductInfo }
             />
+            <Route
+              path={ `${this.props.match.url}/shop All` }
+              component={ shopAll }
+            />
+
           </Switch>
         </div>
+        <Footer />
       </div>
     );
   }

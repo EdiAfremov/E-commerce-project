@@ -65,14 +65,13 @@ class Account extends Component {
 
             })
         }
-
         return (
             <div>
                 <Header icon={ 'shopping_cart' } logout={ true } iconAccount="account_box" />
                 { this.state.loading ? <CircularProgress color={ '#607d8b' } className="spinner" size={ 80 } thickness={ 5 } /> : <div className="account-container">
                     <Paper className="my-account" zDepth={ 1 }>
                         <h2> MY ORDERS</h2>
-                        { orders }
+                        { orders.length == 0 ? <p style={ { textAlign: 'center' } }> There is no orders yet</p> : orders }
                     </Paper>
                 </div> }
             </div>

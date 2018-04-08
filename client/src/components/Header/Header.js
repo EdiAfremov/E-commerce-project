@@ -10,11 +10,20 @@ import { Route, Link, withRouter, Redirect } from 'react-router-dom';
 class header extends Component {
   state = {
     clicked: false,
-    notifications: 0
+    notifications: 0,
   };
+
+  // componentWillMount() {
+  //   let retrievedObject = JSON.parse(localStorage.getItem('items'));
+  //   console.log(retrievedObject)
+  // }
+
+
   onTitleClickHandle = () => {
     this.props.history.push('/main');
   };
+
+
   render() {
     const styles = {
       title: {
@@ -36,18 +45,36 @@ class header extends Component {
       <AppBar
         style={ styles }
         title={ <span onClick={ this.onTitleClickHandle } style={ styles.title }>MyShop</span> }
-        showMenuIconButton={ this.props.showMenu }
+        showMenuIconButton={ false }
         iconElementRight={
           <div>
+            <Link to="/dashboard">
+              <IconButton iconClassName="material-icons" iconStyle={ { color: '#81D4FA' } } tooltip="Dashboard">
+                trending_up
+          </IconButton>
+            </Link>
             <Link to="/MyAccount">
               <IconButton iconClassName="material-icons" iconStyle={ { color: '#fff' } } tooltip="My Account">
                 { this.props.iconAccount }
               </IconButton>
             </Link>
             <Link to="/cart">
-              <IconButton iconClassName="material-icons" iconStyle={ { color: '#fff' } } tooltip="Cart">
-                { this.props.icon }
-              </IconButton>
+              { this.state.notifications > 0 ?
+                <Badge
+                  badgeContent={ this.state.notifications }
+                  secondary={ true }
+                  badgeStyle={ { top: 0, right: 2 } }
+                  style={ { padding: 0 } }
+                >
+                  <IconButton iconClassName="material-icons" iconStyle={ { color: '#fff' } } tooltip="My Bag">
+                    { this.props.icon }
+                  </IconButton>
+                </Badge>
+                :
+                <IconButton iconClassName="material-icons" iconStyle={ { color: '#fff' } } tooltip="My Bag">
+                  { this.props.icon }
+                </IconButton>
+              }
             </Link>
             { logout }
           </div>

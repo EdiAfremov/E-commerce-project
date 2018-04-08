@@ -6,6 +6,8 @@ import Login from './containers/Login/Login';
 import Signup from './containers/Login/Signup/Signup';
 import Cart from '../src/containers/Cart/Cart';
 import MyAccount from '../src/containers/Account/Account'
+import Dashboard from '../src/containers/Dashboard/Dashboard'
+
 import './App.css';
 
 class App extends Component {
@@ -15,11 +17,12 @@ class App extends Component {
         <MuiThemeProvider>
           <div className="App">
             <Switch>
-              <Route path="/" exact component={ Login } />
+              <Route path="/" exact component={ Main } />
               <Route path="/cart" component={ Cart } />
               <Route path="/MyAccount" component={ MyAccount } />
               <Route path="/main" component={ Main } />
               <Route path="/signup" component={ Signup } />
+              <Route path="/dashboard" component={ Dashboard } />
             </Switch>
           </div>
         </MuiThemeProvider>

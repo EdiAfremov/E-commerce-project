@@ -15,6 +15,7 @@ var orderSchema = new Schema({
 })
 
 autoIncrement.initialize(db);
+
 orderSchema.plugin(autoIncrement.plugin, { model: 'Order', field: 'orderNumber' });
 
 var Order = mongoose.model('Order', orderSchema);

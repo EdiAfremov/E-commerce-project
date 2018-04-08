@@ -17,19 +17,29 @@ class cart extends Component {
     notifications: '',
 
   };
-  componentWillMount() {
-    axios({
-      method: 'get',
-      url: 'http://localhost:3001/bag'
-    }).then(response => {
 
-      let filterDuplicateData = response.data.filter((set => f => !set.has(f._id) && set.add(f._id))(new Set));
+  componentWillMount() {
+    // axios({
+    //   method: 'get',
+    //   url: 'http://localhost:3001/bag'
+    // }).then(response => {
+    //   let filterDuplicateData = response.data.filter((set => f => !set.has(f._id) && set.add(f._id))(new Set));
+    //   this.setState({
+    //     products: filterDuplicateData,
+    //     totalPrice: '',
+    //   });
+    // });
+    let retrievedObject = JSON.parse(localStorage.getItem('items'));
+
+    if (retrievedObject) {
+      let filterDuplicateData = retrievedObject.filter((set => f => !set.has(f._id) && set.add(f._id))(new Set));
       this.setState({
         products: filterDuplicateData,
         totalPrice: '',
       });
-    });
+    }
   }
+
   removeItemHandler = (item, event) => {
     let itemsArr = [...this.state.products];
     for (let i = 0; i < itemsArr.length; i++) {
@@ -45,15 +55,16 @@ class cart extends Component {
             };
           },
           () => {
-            axios({
-              method: 'post',
-              url: 'http://localhost:3001/bag/updateBag',
-              data: this.state.products
-            }).then(response => {
-              this.setState(prevState => {
-                return { products: (prevState.products = response.data) };
-              });
-            })
+            // axios({
+            //   method: 'post',
+            //   url: 'http://localhost:3001/bag/updateBag',
+            //   data: this.state.products
+            // }).then(response => {
+            //   this.setState(prevState => {
+            //     return { products: (prevState.products = response.data) };
+            //   });
+            // })
+            localStorage.setItem('items', JSON.stringify(this.state.products));
           }
         );
       }
@@ -72,16 +83,14 @@ class cart extends Component {
       data: {
         order: this.state.products,
         date: date,
-
       }
     }).then(response => {
-      // console.log(response.data)
-    }, swal("Good job!", "You clicked the button!", "success"))
+    }, swal("Thanks!", "Your order was placed!", "success"))
 
     this.setState({
       products: [],
     })
-
+    localStorage.clear();
   }
   render() {
     let products = this.state.products;

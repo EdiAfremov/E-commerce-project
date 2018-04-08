@@ -51,3 +51,16 @@
 .sale:hover {
     background: #ef5350;
 }
+
+@media (max-width: 768px) {
+    .subheader-container {
+        padding: 10px 5px;
+    }
+    .item {
+        width: 80px;
+        font-size: 15px;
+    }
+    .sale {
+        width: 60px;
+    }
+}

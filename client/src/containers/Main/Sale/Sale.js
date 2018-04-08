@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
-import { withRouter, Link, Route, Switch } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 import axios from 'axios';
 import '../Clothing/Clothing.css';
 import Checkbox from 'material-ui/Checkbox';
 import FontIcon from 'material-ui/FontIcon';
-import IconButton from 'material-ui/IconButton';
 import update from 'immutability-helper';
-import ProductInfo from '../ProductInfo/ProductInfo';
 import CircularProgress from 'material-ui/CircularProgress';
+import Sort from '../../../components/sortingItems/sortingItems'
+import _ from 'lodash';
 
 class Sale extends Component {
   state = {
@@ -23,15 +23,80 @@ class Sale extends Component {
       method: 'get',
       url: 'http://localhost:3001/Sale'
     }).then(response => {
-      console.log(response.data.arr)
+      let counter = response.data.arr
       this.setState({
         products: response.data.arr,
-        numberOfItems: response.data.count,
+        numberOfItems: counter.length,
         loading: false,
       });
     });
   }
+  sortHandle = (value, sortBy) => {
+    let sortState = [...this.state.products];
+    let sorted;
+    if (sortBy === 'price') {
+      switch (value) {
+        case 'Price low to high':
+          sorted = sortState.sort((a, b) => {
+            return a.price - b.price
+          })
+          break;
+        case 'Price high to low':
+          sorted = sortState.sort((a, b) => {
+            return a.price - b.price
+          }).reverse()
+          break;
+        default:
+          break;
+      }
+      this.setState(prevState => {
+        return {
+          products: prevState.products = sorted,
+        }
+      })
+    }
+    if (sortBy === 'brand') {
+      if (value === 'All') {
+        axios({
+          method: 'get',
+          url: 'http://localhost:3001/Sale'
+        }).then(response => {
+          let counter = response.data.arr
+          this.setState({
+            products: response.data.arr,
+            numberOfItems: counter.length,
+            loading: false,
+          });
+        });
+      } else {
+        axios({
+          method: 'get',
+          url: `http://localhost:3001/Sale/${value}`
+        }).then(response => {
+          let counter = response.data
+          if (counter.length === 0) {
+            return;
+          }
+          this.setState({
+            products: response.data,
+            numberOfItems: counter.length,
+            loading: false,
+          });
+        });
+      }
 
+    }
+    if (sortBy === 'type') {
+      let sortByType = _.filter([...this.state.products], { 'type': value });
+      if (sortByType.length === 0) {
+        return;
+      }
+      this.setState({
+        products: sortByType,
+        numberOfItems: sortByType.length,
+      });
+    }
+  }
   componentWillUnmount() {
     localStorage.setItem(
       'productsLiked',
@@ -49,10 +114,9 @@ class Sale extends Component {
           productsLiked: (prevState.productsLiked = arr)
         };
       },
-      () => console.log(this.state.productsLiked)
+
     );
   };
-
   likeHandler = (id, event) => {
     if (event.target.checked) {
       this.setState(
@@ -68,7 +132,7 @@ class Sale extends Component {
       let removeProduct = [...this.state.productsLiked];
       for (let i = 0; i < removeProduct.length; i++) {
         const product = removeProduct[i].id;
-        if (product == id.id) {
+        if (product === id.id) {
           let index = removeProduct.indexOf(removeProduct[i]);
           this.setState(prevState => {
             return {
@@ -89,11 +153,11 @@ class Sale extends Component {
       padding: '4px'
     }
 
-    let likedProducts = 'favorite_border';
-    if (this.state.productsLiked.length > 0) {
-      for (let i = 0; i < this.state.productsLiked.length; i++) { }
-      likedProducts = 'favorite';
-    }
+    // // let likedProducts = 'favorite_border';
+    // if (this.state.productsLiked.length > 0) {
+    //   for (let i = 0; i < this.state.productsLiked.length; i++) { }
+    //   // likedProducts = 'favorite';
+    // }
 
     let productsList = this.state.products;
 
@@ -118,7 +182,7 @@ class Sale extends Component {
             <p className="brand">{ productsList[product].brand } { productsList[product].type } in  { productsList[product].color }</p>
             <p className="price" >
               <span style={ {
-                letterSpacing: '.5px',
+
                 fontWeight: 700,
                 letterSpacing: '2px',
                 color: '#d01345'
@@ -152,8 +216,10 @@ class Sale extends Component {
 
     return (
       <div>
+        { this.state.loading ? '' : <Sort sortVal={ this.sortHandle.bind(this) } sortvalues={ this.state.products } /> }
         { this.state.loading ? '' : <div className='counter'> { this.state.numberOfItems } styles found </div> }
-        <div className="sale-container">
+
+        <div className={ this.state.products.length < 4 ? 'clothing-container center' : 'sale-container' }>
           { this.state.loading ? <CircularProgress color={ '#607d8b' } className="spinner" size={ 80 } thickness={ 5 } /> : products }
         </div>
       </div>)

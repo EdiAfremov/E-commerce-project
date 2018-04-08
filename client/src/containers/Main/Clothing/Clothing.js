@@ -1,39 +1,69 @@
 import React, { Component } from 'react';
-import { withRouter, Link, Route, Switch } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 import axios from 'axios';
 import './Clothing.css';
 import Checkbox from 'material-ui/Checkbox';
 import FontIcon from 'material-ui/FontIcon';
-import IconButton from 'material-ui/IconButton';
-import LikeCheckbox from '../../../components/Like/Like'
 import update from 'immutability-helper';
-import ProductInfo from '../ProductInfo/ProductInfo';
 import CircularProgress from 'material-ui/CircularProgress';
-import SelectField from 'material-ui/SelectField';
 import MenuItem from 'material-ui/MenuItem';
+import Sort from '../../../components/sortingItems/sortingItems'
 import _ from 'lodash';
-import SortingItems from '../../../components/sortingItems/sortingItems'
 
 
 
 let ARR = []
 class clothing extends Component {
+
   state = {
     products: [],
-    filters: {
-      sortValue: '',
-      brandValue: '',
-      brandsNames: [],
-      sortByItem: '',
-      types: [],
-    },
     numberOfItems: '',
     likeCliked: false,
     productsLiked: [],
     productCliked: false,
     loading: true,
   };
+  componentWillReceiveProps(props) {
+    if (props.location.state) {
+      if (props.location.state.allClothes) {
+        this.getAllClothes()
+      }
+    }
+  }
   componentDidMount() {
+    if (this.props.location.state) {
+      if (this.props.location.state.welcomePage) {
+        this.getClothesByType(this.props.location.state.type)
+      } else {
+        this.getAllClothes()
+      }
+    }
+  }
+
+  getClothesByType = (type) => {
+    axios({
+      method: 'get',
+      url: `http://localhost:3001/main/${type}`
+    }).then(response => {
+      let brands = _.uniqBy(response.data.clothes, 'brand');
+      let types = _.uniqBy(response.data.clothes, 'type');
+      this.setState(prevState => {
+        let counter = response.data.clothes;
+        return {
+          products: response.data.clothes,
+          filters: {
+            sortValue: '',
+            brandValue: '',
+            brandsNames: brands,
+            types: types,
+          },
+          numberOfItems: counter.length,
+          loading: false,
+        }
+      });
+    });
+  }
+  getAllClothes = () => {
     axios({
       method: 'get',
       url: 'http://localhost:3001/clothing'
@@ -55,69 +85,68 @@ class clothing extends Component {
       });
     });
   }
-
-  handleSortChange = (event, index, value) => {
-
+  sortHandle = (value, sortBy) => {
     let sortState = [...this.state.products];
     let sorted;
-    switch (value) {
-      case 'Price low to high':
-        sorted = sortState.sort((a, b) => {
-          return a.price - b.price
-        })
-        break;
-      case 'Price high to low':
-        sorted = sortState.sort((a, b) => {
-          return a.price - b.price
-        }).reverse()
-        break;
-      default:
-        break;
-    }
-    this.setState(prevState => {
-      return {
-        products: prevState.products = sorted,
-        sortValue: prevState.sortValue = value,
-        ...prevState,
+    if (sortBy === 'price') {
+      switch (value) {
+        case 'Price low to high':
+          sorted = sortState.sort((a, b) => {
+            return a.price - b.price
+          })
+          break;
+        case 'Price high to low':
+          sorted = sortState.sort((a, b) => {
+            return a.price - b.price
+          }).reverse()
+          break;
+
+        default:
+          break;
       }
-    })
-
-  };
-
-  brandChangeHandler = (event, index, value) => {
-    axios({
-      method: 'get',
-      url: `http://localhost:3001/clothing/search/${value}`
-    }).then(response => {
-      console.log(response.data.products.length)
       this.setState(prevState => {
         return {
-          products: prevState.products = response.data.products,
-          brandValue: prevState.brandValue = value,
-          numberOfItems: prevState.numberOfItems = response.data.products.length,
-          ...prevState
+          products: prevState.products = sorted,
         }
       })
-    });
-  };
-  typeChangeHandler = (event, index, value) => {
+    }
+    if (sortBy === 'brand') {
+      if (value === 'All') {
+        this.getAllClothes()
+      } else {
+        axios({
+          method: 'get',
+          url: `http://localhost:3001/clothing/${value}`
+        }).then(response => {
+          let counter = response.data
+          if (counter.length === 0) {
+            return;
+          }
+          this.setState({
+            products: response.data,
+            numberOfItems: counter.length,
+            loading: false,
+          });
+        });
+      }
 
+    }
 
-    axios({
-      method: 'get',
-      url: `http://localhost:3001/clothing/search/type/${value}`
-    }).then(response => {
-
+    if (sortBy === 'type') {
+      let currentState = [...this.state.products]
+      let sortByType = _.filter(currentState, { 'type': value });
+      if (sortByType.length === 0) {
+        return;
+      }
       this.setState(prevState => {
         return {
-          products: prevState.products = response.data.products,
-          sortByItem: prevState.sortByItem = value,
-          numberOfItems: prevState.numberOfItems = response.data.products.length,
-          ...prevState
+          products: prevState.products = sortByType,
+          numberOfItems: sortByType.length,
         }
-      })
-    });
-  };
+      });
+    }
+  }
+
 
 
   likedProductsHandler = id => {
@@ -146,15 +175,6 @@ class clothing extends Component {
       }).then(response => {
         console.log(response.data)
       });
-      // this.setState(
-      //   prevState => {
-      //     return {
-      //       likeChecked: !prevState.likeChecked,
-      //       productsLiked: [...prevState.productsLiked, id]
-      //     };
-      //   },
-      //   () => this.likedProductsHandler()
-      // );
     } else {
       let removeProduct = [...this.state.productsLiked];
       for (let i = 0; i < removeProduct.length; i++) {
@@ -186,11 +206,7 @@ class clothing extends Component {
       padding: '4px'
     }
     let productsList = this.state.products;
-
-
     const products = Object.keys(productsList).map((product, id) => {
-
-
       return (
         <div key={ id } className="product" >
           <Link
@@ -226,53 +242,7 @@ class clothing extends Component {
 
     return (
       <div>
-        <div className="sorting-container" >
-          <div className="fields">
-            <SelectField
-              style={ { width: '180px' } }
-              underlineStyle={ { color: 'black' } }
-              name="Sort"
-              hintText="Sort"
-              hintStyle={ { color: 'black' } }
-              value={ this.state.sortValue }
-              onChange={ this.handleSortChange }
-            >
-              <MenuItem value={ 'Price high to low' } label="Price high to low" primaryText="Price high to low" />
-              <MenuItem value={ "Price low to high" } label="Price low to high" primaryText="Price low to high" />
-            </SelectField>
-            <SelectField
-              style={ { width: '180px' } }
-              underlineStyle={ { color: 'black' } }
-              name="Brand"
-              hintText="Brand"
-              hintStyle={ { color: 'black' } }
-              value={ this.state.brandValue }
-              onChange={ this.brandChangeHandler }
-            >
-              { this.state.products ? this.state.filters.brandsNames.map((item, i) => {
-                return <MenuItem key={ i } value={ item.brand } label={ item.brand } primaryText={ item.brand } />
-
-              }) : null }
-
-            </SelectField>
-            <SelectField
-              style={ { width: '180px' } }
-              underlineStyle={ { color: 'black' } }
-              name="Type"
-              hintText="Type"
-              hintStyle={ { color: 'black' } }
-              value={ this.state.sortByItem }
-              onChange={ this.typeChangeHandler }
-            >
-              { this.state.products ? this.state.filters.types.map((item, i) => {
-                return <MenuItem key={ i } value={ item.type } label={ item.type } primaryText={ item.type } />
-
-              }) : null }
-
-            </SelectField>
-
-          </div>
-        </div>
+        { this.state.loading ? '' : <Sort sortVal={ this.sortHandle.bind(this) } sortvalues={ this.state.products } /> }
         { this.state.loading ? '' : <div className='counter'> { this.state.numberOfItems } styles found </div> }
         <div className={ this.state.products.length < 4 ? 'clothing-container center' : 'clothing-container' }>
           { this.state.loading ? <CircularProgress color={ '#607d8b' } className="spinner" size={ 80 } thickness={ 5 } /> : products }
@@ -283,3 +253,4 @@ class clothing extends Component {
 }
 
 export default withRouter(clothing);
+

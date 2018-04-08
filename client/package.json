@@ -11,6 +11,9 @@
     "react-material-ui-form-validator": "^1.1.0",
     "react-router-dom": "^4.2.2",
     "react-scripts": "1.1.1",
+    "react-slick": "^0.22.3",
+    "recharts": "^1.0.0-beta.10",
+    "slick-carousel": "^1.8.1",
     "sweetalert": "^2.1.0"
   },
   "scripts": {

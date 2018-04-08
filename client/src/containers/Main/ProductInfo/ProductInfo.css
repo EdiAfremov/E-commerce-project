@@ -27,7 +27,7 @@
 .product-name {
     box-sizing: border-box;
     padding: 30px;
-    height: 100%;
+    height: auto;
     display: flex;
     flex-direction: column;
 }

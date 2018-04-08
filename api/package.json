@@ -19,6 +19,7 @@
     "mongoose-auto-increment": "^5.0.1",
     "morgan": "~1.9.0",
     "npm": "^5.7.1",
+    "pip": "0.0.1",
     "pug": "2.0.0-beta11",
     "serve-favicon": "~2.4.5",
     "validator": "^9.4.1"

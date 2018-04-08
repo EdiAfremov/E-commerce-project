@@ -16,6 +16,11 @@ var shoes = require('./routes/shoes');
 var sale = require('./routes/sale');
 var orders = require('./routes/orders');
 var likedItems = require('./routes/likedItems');
+var carousel = require('./routes/carousel');
+var mainPage = require('./routes/mainPage');
+var allProducts = require('./routes/allProducts');
+var dashboard = require('./routes/dashboard');
+
 var app = express();
 
 app.use(cors());
@@ -44,6 +49,10 @@ app.use('/updateBag', bag);
 app.use('/updateBagIcon', bag);
 app.use('/likedItems', likedItems);
 app.use('/orders', orders);
+app.use('/carousel', carousel);
+app.use('/main', mainPage);
+app.use('/allProducts', allProducts);
+app.use('/dashboard', dashboard);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

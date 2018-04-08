@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { withRouter, Link, Route, Switch } from 'react-router-dom';
+import { withRouter, Link } from 'react-router-dom';
 import axios from 'axios';
 import '../Clothing/Clothing.css';
 import Checkbox from 'material-ui/Checkbox';
@@ -8,6 +8,8 @@ import IconButton from 'material-ui/IconButton';
 import update from 'immutability-helper';
 import ProductInfo from '../ProductInfo/ProductInfo';
 import CircularProgress from 'material-ui/CircularProgress';
+import Sort from '../../../components/sortingItems/sortingItems'
+import _ from 'lodash';
 
 class Shoes extends Component {
   state = {
@@ -37,7 +39,71 @@ class Shoes extends Component {
       JSON.stringify(this.state.productsLiked)
     );
   }
+  sortHandle = (value, sortBy) => {
+    let sortState = [...this.state.products];
+    let sorted;
+    if (sortBy === 'price') {
+      switch (value) {
+        case 'Price low to high':
+          sorted = sortState.sort((a, b) => {
+            return a.price - b.price
+          })
+          break;
+        case 'Price high to low':
+          sorted = sortState.sort((a, b) => {
+            return a.price - b.price
+          }).reverse()
+          break;
+        default:
+          break;
+      }
+      this.setState(prevState => {
+        return {
+          products: prevState.products = sorted,
+        }
+      })
+    }
+    if (sortBy === 'brand') {
+      if (value === 'All') {
+        axios({
+          method: 'get',
+          url: 'http://localhost:3001/shoes'
+        }).then(response => {
+          this.setState({
+            products: response.data.shoes,
+            numberOfItems: response.data.count,
+            loading: false,
+          });
+        });
+      } else {
+        axios({
+          method: 'get',
+          url: `http://localhost:3001/shoes/${value}`
+        }).then(response => {
+          let counter = response.data
+          if (counter.length === 0) {
+            return;
+          }
+          this.setState({
+            products: response.data,
+            numberOfItems: counter.length,
+            loading: false,
+          });
+        });
+      }
 
+    }
+    if (sortBy === 'type') {
+      let sortByType = _.filter([...this.state.products], { 'type': value });
+      if (sortByType.length === 0) {
+        return;
+      }
+      this.setState({
+        products: sortByType,
+        numberOfItems: sortByType.length,
+      });
+    }
+  }
   likedProductsHandler = id => {
     let arr = [...new Set(this.state.productsLiked)];
     this.setState(
@@ -133,8 +199,9 @@ class Shoes extends Component {
 
     return (
       <div>
+        { this.state.loading ? '' : <Sort sortVal={ this.sortHandle.bind(this) } sortvalues={ this.state.products } /> }
         { this.state.loading ? '' : <div className='counter'> { this.state.numberOfItems } styles found </div> }
-        <div className="shoes-container">
+        <div className={ this.state.products.length < 4 ? 'clothing-container center' : 'shoes-container' }>
           { this.state.loading ? <CircularProgress color={ '#607d8b' } className="spinner" size={ 80 } thickness={ 5 } /> : products }
         </div>
       </div>)
