@@ -1,7 +1,7 @@
 
 var mongoose = require('mongoose');
 autoIncrement = require('mongoose-auto-increment');
-mongoose.connect('mongodb://localhost:27017/shopDB');
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/shopDB');
 
 var db = mongoose.connection;
 autoIncrement.initialize(db);

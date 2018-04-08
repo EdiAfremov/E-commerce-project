@@ -1,0 +1,27 @@
+/* .dashboard-container {
+    max-width: 1600px;
+    padding: 0 50px;
+    box-sizing: border-box;
+    margin: 0 auto;
+}
+
+.dashboard-container-sideBarOpen {
+    max-width: 1600px;
+    padding: 0 50px;
+    box-sizing: border-box;
+    margin: 0 auto;
+}
+
+.navbar {
+    position: absolute !important;
+    top: 64px !important;
+    z-index: 100 !important;
+}
+
+@media (max-width: 767px) {
+    .dashboard-container {
+        padding: 0 15px;
+        box-sizing: border-box;
+        margin: 0 auto;
+    }
+} */
